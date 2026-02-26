@@ -1,0 +1,73 @@
+package com.chatbotsaas.chatbot_saas.conversation.service;
+
+import com.chatbotsaas.chatbot_saas.bot.repository.BotRepository;
+import com.chatbotsaas.chatbot_saas.conversation.dto.request.ConversationRequestDto;
+import com.chatbotsaas.chatbot_saas.conversation.dto.response.ConversationResponseDto;
+import com.chatbotsaas.chatbot_saas.conversation.entity.Conversation;
+import com.chatbotsaas.chatbot_saas.conversation.repository.ConversationRepository;
+import com.chatbotsaas.chatbot_saas.shared.exception.AppException;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
+
+@Service
+public class ConversationService {
+    private final BotRepository botRepository;
+    private final ConversationRepository conversationRepository;
+
+    public ConversationService(BotRepository botRepository, ConversationRepository conversationRepository) {
+        this.botRepository = botRepository;
+        this.conversationRepository = conversationRepository;
+    }
+
+    private ConversationResponseDto toResponseDto (Conversation conversation) {
+        return ConversationResponseDto.builder()
+                .conversationId(conversation.getId())
+                .botId(conversation.getBotId())
+                .sessionId(conversation.getSessionId())
+                .role(conversation.getRole())
+                .message(conversation.getMessage())
+                .createdAt(conversation.getCreatedAt())
+                .build();
+    }
+
+    @Transactional
+    public ConversationResponseDto saveMessage(ConversationRequestDto request) {
+        botRepository.findById(request.getBotId()).orElseThrow(
+                () -> new IllegalArgumentException("Bot not found")
+        );
+        Conversation conversation = conversationRepository.save(
+                    Conversation.builder()
+                            .botId(request.getBotId())
+                            .sessionId(request.getSessionId())
+                            .role(request.getRole())
+                            .message(request.getMessage())
+                            .build()
+        );
+        return toResponseDto(conversation);
+    }
+
+    @Transactional
+    public List<ConversationResponseDto> getConversationByBot(UUID botId) {
+        botRepository.findById(botId).orElseThrow(
+                () -> new IllegalArgumentException("Bot not found")
+        );
+        List<Conversation> conversations = conversationRepository.findByBotIdOrderByCreatedAtAsc(botId);
+        return conversations.stream().map(
+                this::toResponseDto
+        ).toList();
+    }
+
+    public List<ConversationResponseDto> getConversationBySession(String sessionId) {
+        if (!conversationRepository.existsBySessionId(sessionId)) {
+            throw new AppException("session not found", HttpStatus.NOT_FOUND);
+        }
+        List<Conversation> conversations = conversationRepository.findBySessionIdOrderByCreatedAtAsc(sessionId);
+        return conversations.stream().map(
+                this::toResponseDto
+        ).toList();
+    }
+}
