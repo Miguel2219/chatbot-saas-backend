@@ -1,7 +1,9 @@
 package com.chatbotsaas.chatbot_saas.integration;
 
+import com.chatbotsaas.chatbot_saas.chat.dto.response.ChatResponseDto;
 import com.chatbotsaas.chatbot_saas.integration.dto.request.ChatRequest;
 import com.chatbotsaas.chatbot_saas.integration.dto.request.ProcessDocumentRequest;
+import com.chatbotsaas.chatbot_saas.integration.dto.response.ChatResponsePythonDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -30,7 +32,8 @@ public class PythonRagClient {
                 .uri("/chat")
                 .bodyValue(request)
                 .retrieve()
-                .bodyToMono(String.class)
-                .block();
+                .bodyToMono(ChatResponsePythonDto.class)
+                .block()
+                .getResponse();
     }
 }
