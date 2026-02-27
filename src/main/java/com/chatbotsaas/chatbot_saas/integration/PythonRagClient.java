@@ -2,6 +2,7 @@ package com.chatbotsaas.chatbot_saas.integration;
 
 import com.chatbotsaas.chatbot_saas.chat.dto.response.ChatResponseDto;
 import com.chatbotsaas.chatbot_saas.integration.dto.request.ChatRequest;
+import com.chatbotsaas.chatbot_saas.integration.dto.request.DeleteDocumentRequest;
 import com.chatbotsaas.chatbot_saas.integration.dto.request.ProcessDocumentRequest;
 import com.chatbotsaas.chatbot_saas.integration.dto.response.ChatResponsePythonDto;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,5 +36,17 @@ public class PythonRagClient {
                 .bodyToMono(ChatResponsePythonDto.class)
                 .block()
                 .getResponse();
+    }
+
+    public void deleteDocument(DeleteDocumentRequest request) {
+        webClient.delete()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/delete-document")
+                        .queryParam("botId", request.getBotId())
+                        .queryParam("documentId", request.getDocumentId())
+                        .build())
+                .retrieve()
+                .bodyToMono(Void.class)
+                .block();
     }
 }

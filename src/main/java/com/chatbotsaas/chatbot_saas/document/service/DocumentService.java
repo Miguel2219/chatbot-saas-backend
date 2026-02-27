@@ -4,7 +4,11 @@ import com.chatbotsaas.chatbot_saas.bot.repository.BotRepository;
 import com.chatbotsaas.chatbot_saas.document.dto.response.DocumentResponseDto;
 import com.chatbotsaas.chatbot_saas.document.entity.Document;
 import com.chatbotsaas.chatbot_saas.document.repository.DocumentRepository;
+import com.chatbotsaas.chatbot_saas.integration.PythonRagClient;
+import com.chatbotsaas.chatbot_saas.integration.dto.request.DeleteDocumentRequest;
+import com.chatbotsaas.chatbot_saas.shared.exception.AppException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,13 +25,15 @@ import java.util.UUID;
 public class DocumentService {
     private final DocumentRepository documentRepository;
     private final BotRepository botRepository;
+    private final PythonRagClient pythonRagClient;
 
     @Value("${app.upload-dir}")
     private String uploadDir;
 
-    public DocumentService(DocumentRepository documentRepository, BotRepository botRepository) {
+    public DocumentService(DocumentRepository documentRepository, BotRepository botRepository, PythonRagClient pythonRagClient) {
         this.documentRepository = documentRepository;
         this.botRepository = botRepository;
+        this.pythonRagClient = pythonRagClient;
     }
 
     @Transactional(rollbackFor = IOException.class)
@@ -74,5 +80,29 @@ public class DocumentService {
                     .createdAt(document.getCreatedAt())
                     .build()
         ).toList();
+    }
+
+    @Transactional
+    public void deleteDocument(UUID documentId) {
+        Document document = documentRepository.findById(documentId).orElseThrow(
+                () -> new AppException("Document not found", HttpStatus.NOT_FOUND)
+        );
+
+        //Sending request from python to delete document
+        pythonRagClient.deleteDocument(DeleteDocumentRequest.builder()
+                .documentId(documentId)
+                .botId(document.getBotId())
+                .build()
+        );
+
+        //Getting path from file
+        try {
+            Path filePath = Paths.get(document.getFilePath());
+            Files.deleteIfExists(filePath);
+        } catch (IOException e) {
+            throw new AppException("Failed to delete file", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
+        documentRepository.deleteById(documentId);
+    }
 }
