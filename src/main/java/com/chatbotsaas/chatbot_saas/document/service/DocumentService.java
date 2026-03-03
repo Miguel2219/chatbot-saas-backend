@@ -6,6 +6,7 @@ import com.chatbotsaas.chatbot_saas.document.entity.Document;
 import com.chatbotsaas.chatbot_saas.document.repository.DocumentRepository;
 import com.chatbotsaas.chatbot_saas.integration.PythonRagClient;
 import com.chatbotsaas.chatbot_saas.integration.dto.request.DeleteDocumentRequest;
+import com.chatbotsaas.chatbot_saas.integration.dto.request.ProcessDocumentRequest;
 import com.chatbotsaas.chatbot_saas.shared.exception.AppException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -57,6 +58,11 @@ public class DocumentService {
                             .botId(botId)
                             .build()
             );
+            pythonRagClient.processDocument(ProcessDocumentRequest.builder()
+                    .botId(botId)
+                    .documentId(saved.getDocumentId())
+                    .filePath(filePath.toAbsolutePath().toString())
+                    .build());
             documentsResponse.add(DocumentResponseDto.builder()
                     .documentId(saved.getDocumentId())
                     .fileName(saved.getFileName())
@@ -72,13 +78,13 @@ public class DocumentService {
     public List<DocumentResponseDto> getDocumentsByBotId(UUID botId) {
         List<Document> documents = documentRepository.findByBotId(botId);
         return documents.stream().map(document ->
-            DocumentResponseDto.builder()
-                    .documentId(document.getDocumentId())
-                    .fileName(document.getFileName())
-                    .fileSize(document.getFileSize())
-                    .fileType(document.getFileType())
-                    .createdAt(document.getCreatedAt())
-                    .build()
+                DocumentResponseDto.builder()
+                        .documentId(document.getDocumentId())
+                        .fileName(document.getFileName())
+                        .fileSize(document.getFileSize())
+                        .fileType(document.getFileType())
+                        .createdAt(document.getCreatedAt())
+                        .build()
         ).toList();
     }
 

@@ -34,4 +34,12 @@ public class DocumentController {
     ) {
        return ResponseEntity.ok(documentService.getDocumentsByBotId(botId));
     }
+
+    @DeleteMapping("/{document_id}")
+    public ResponseEntity<Void> deleteDocument(
+            @PathVariable(name = "document_id") UUID documentId
+    ) {
+        documentService.deleteDocument(documentId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }
