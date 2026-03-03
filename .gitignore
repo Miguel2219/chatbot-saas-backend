@@ -34,3 +34,4 @@ build/
 
 ### Sensitive files ###
 application-dev.yml
+uploads/
