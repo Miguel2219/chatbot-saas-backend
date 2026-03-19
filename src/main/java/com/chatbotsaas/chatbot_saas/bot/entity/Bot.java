@@ -1,18 +1,23 @@
 package com.chatbotsaas.chatbot_saas.bot.entity;
 
 import com.chatbotsaas.chatbot_saas.tenant.entity.Tenant;
+import com.chatbotsaas.chatbot_saas.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
 @Table(name = "bots")
 @NoArgsConstructor
 @Getter
+@Setter
 public class Bot {
 
     @Id
@@ -34,6 +39,17 @@ public class Bot {
     @JoinColumn(name = "tenant_id", nullable = false)
     private Tenant tenant;
 
+    @Column(name = "last_adviser_index", nullable = false)
+    private Integer lastAdviserIndex = 0;
+
+    @ManyToMany
+    @JoinTable(
+            name = "bot_advisers",
+            joinColumns = @JoinColumn(name = "bot_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<User> advisers = new ArrayList<>();
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -48,7 +64,6 @@ public class Bot {
         this.tenant = tenant;
         this.isActive = isActive;
     }
-
 
     public static Bot create(String name, String description, Tenant tenant) {
         return new Bot(name, description, tenant, Boolean.TRUE);

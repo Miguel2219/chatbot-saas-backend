@@ -1,11 +1,12 @@
 package com.chatbotsaas.chatbot_saas.integration;
 
-import com.chatbotsaas.chatbot_saas.chat.dto.response.ChatResponseDto;
 import com.chatbotsaas.chatbot_saas.integration.dto.request.ChatRequest;
 import com.chatbotsaas.chatbot_saas.integration.dto.request.DeleteDocumentRequest;
 import com.chatbotsaas.chatbot_saas.integration.dto.request.ProcessDocumentRequest;
 import com.chatbotsaas.chatbot_saas.integration.dto.response.ChatResponsePythonDto;
+import com.chatbotsaas.chatbot_saas.shared.exception.AppException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -24,18 +25,37 @@ public class PythonRagClient {
                 .uri("/process")
                 .bodyValue(request)
                 .retrieve()
+                .onStatus(
+                        status -> status.is4xxClientError(),
+                        response -> response.bodyToMono(String.class)
+                                .map(body -> new AppException(body, HttpStatus.BAD_REQUEST))
+                )
+                .onStatus(
+                        status -> status.is5xxServerError(),
+                        response -> response.bodyToMono(String.class)
+                                .map(body -> new AppException("Python service error: "+ body, HttpStatus.INTERNAL_SERVER_ERROR))
+                )
                 .bodyToMono(Void.class)
                 .block();
     }
 
-    public String chat(ChatRequest request) {
+    public ChatResponsePythonDto chat(ChatRequest request) {
         return webClient.post()
                 .uri("/chat")
                 .bodyValue(request)
                 .retrieve()
+                .onStatus(
+                        status -> status.is4xxClientError(),
+                        response -> response.bodyToMono(String.class)
+                                .map(body -> new AppException(body, HttpStatus.BAD_REQUEST))
+                )
+                .onStatus(
+                        status -> status.is5xxServerError(),
+                        response -> response.bodyToMono(String.class)
+                                .map(body -> new AppException("Python service error: "+ body, HttpStatus.INTERNAL_SERVER_ERROR))
+                )
                 .bodyToMono(ChatResponsePythonDto.class)
-                .block()
-                .getResponse();
+                .block();
     }
 
     public void deleteDocument(DeleteDocumentRequest request) {

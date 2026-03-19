@@ -20,6 +20,7 @@ public class RegisterBotDto {
     @JsonProperty(value = "tenant_id")
     private UUID tenantID;
 
+
     public RegisterBotDto (String name, String description, UUID tenantID) {
         this.name = name;
         this.description = description;

@@ -1,20 +1,25 @@
 package com.chatbotsaas.chatbot_saas.user.entity;
 
+import com.chatbotsaas.chatbot_saas.bot.entity.Bot;
+import com.chatbotsaas.chatbot_saas.role.constant.RoleConstants;
 import com.chatbotsaas.chatbot_saas.tenant.entity.Tenant;
+import com.chatbotsaas.chatbot_saas.user.enums.NotificationChannel;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
 @Table(name = "users")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class User {
 
     @Id
@@ -23,17 +28,24 @@ public class User {
     @UuidGenerator
     private UUID userId;
 
-    @Column(name = "name", nullable = false)
-    private String name;
-
-    @Column(name = "email", nullable = false)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     @Column(name = "password", nullable = false)
     private String password;
 
     @Column(name = "role", nullable = false)
-    private String role;
+    private RoleConstants role;
+
+    @OneToOne(mappedBy = "user")
+    private Person person;
+
+    @ManyToMany(mappedBy = "advisers")
+    private List<Bot> bots = new ArrayList<>();
+
+    @Column(name = "notification_channel")
+    @Enumerated(EnumType.STRING)
+    private NotificationChannel notificationChannel;
 
     @ManyToOne //The first parameter (Many in this case) corresponds to current class
     @JoinColumn(name = "tenant_id", nullable = false)
@@ -46,4 +58,5 @@ public class User {
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
     }
+
 }

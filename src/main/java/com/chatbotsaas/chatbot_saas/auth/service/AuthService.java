@@ -4,6 +4,7 @@ import com.chatbotsaas.chatbot_saas.auth.dto.LoginRequest;
 import com.chatbotsaas.chatbot_saas.auth.dto.LoginResponse;
 import com.chatbotsaas.chatbot_saas.auth.dto.RegisterRequest;
 import com.chatbotsaas.chatbot_saas.auth.security.JwtTokenProvider;
+import com.chatbotsaas.chatbot_saas.role.constant.RoleConstants;
 import com.chatbotsaas.chatbot_saas.tenant.entity.Tenant;
 import com.chatbotsaas.chatbot_saas.tenant.repository.TenantRepository;
 import com.chatbotsaas.chatbot_saas.user.entity.User;
@@ -26,10 +27,9 @@ public class AuthService {
     public void register(RegisterRequest request) {
         Tenant tenant = tenantRepository.findById(request.getTenantId()).orElseThrow();
         User userCreated = new User();
-        userCreated.setName(request.getName());
         userCreated.setEmail(request.getEmail());
         userCreated.setPassword(passwordEncoder.encode(request.getPassword()));
-        userCreated.setRole("USER");
+        userCreated.setRole(RoleConstants.USER);
         userCreated.setTenant(tenant);
         userRepository.save(userCreated);
     }

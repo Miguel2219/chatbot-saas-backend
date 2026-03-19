@@ -1,5 +1,6 @@
 package com.chatbotsaas.chatbot_saas.integration.dto.response;
 
+import com.chatbotsaas.chatbot_saas.lead.dto.response.LeadDataDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,4 +11,12 @@ public class ChatResponsePythonDto {
 
     @JsonProperty(value = "response")
     private String response;
+
+    @JsonProperty(value = "lead_captured")
+    private Boolean leadCaptured;
+
+    @JsonProperty(value = "lead_data")
+    private LeadDataDto leadData;
+
+
 }

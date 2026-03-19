@@ -6,28 +6,31 @@ import com.chatbotsaas.chatbot_saas.bot.entity.Bot;
 import com.chatbotsaas.chatbot_saas.bot.repository.BotRepository;
 import com.chatbotsaas.chatbot_saas.tenant.entity.Tenant;
 import com.chatbotsaas.chatbot_saas.tenant.repository.TenantRepository;
+import com.chatbotsaas.chatbot_saas.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class BotService {
     private final BotRepository botRepository;
     private final TenantRepository tenantRepository;
+    private final UserRepository userRepository;
 
-    public BotService(BotRepository botRepository, TenantRepository tenantRepository) {
+    public BotService(BotRepository botRepository, TenantRepository tenantRepository, UserRepository userRepository) {
         this.botRepository = botRepository;
         this.tenantRepository = tenantRepository;
+        this.userRepository = userRepository;
     }
 
     @Transactional
     public ResponseBotDto createBot(RegisterBotDto bot) {
         Tenant tenant = tenantRepository.findById(bot.getTenantID()).orElseThrow(
-                () -> new IllegalArgumentException("La empresa no existe")
+                () -> new IllegalArgumentException("Tenant not found")
         );
+
 
         Bot botSave = botRepository.save(
                 Bot.create(
@@ -64,4 +67,5 @@ public class BotService {
         );
         botRepository.deleteById(botId);
     }
+
 }
