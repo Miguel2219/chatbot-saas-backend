@@ -1,5 +1,6 @@
 package com.chatbotsaas.chatbot_saas.lead.dto.request;
 
+import com.chatbotsaas.chatbot_saas.lead.enums.LeadChannel;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,5 +29,11 @@ public class LeadRequestDto {
 
     @JsonProperty(value = "email")
     private String email;
+
+    @JsonProperty(value = "request_detail")
+    private String requestDetail;
+
+    @JsonProperty(value = "channel")
+    private LeadChannel leadChannel;
 
 }

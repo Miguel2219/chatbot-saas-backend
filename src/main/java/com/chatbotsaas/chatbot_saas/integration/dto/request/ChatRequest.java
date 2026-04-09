@@ -1,7 +1,6 @@
 package com.chatbotsaas.chatbot_saas.integration.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -18,4 +17,7 @@ public class ChatRequest {
 
     @JsonProperty(value = "message")
     private String message;
+
+    @JsonProperty(value = "system_prompt")
+    private String systemPrompt;
 }

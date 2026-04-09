@@ -1,5 +1,6 @@
 package com.chatbotsaas.chatbot_saas.lead.entity;
 
+import com.chatbotsaas.chatbot_saas.lead.enums.LeadChannel;
 import com.chatbotsaas.chatbot_saas.lead.enums.LeadStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -37,6 +38,12 @@ public class Lead {
 
     @Column(name = "email", nullable = true)
     private String email;
+
+    @Column(name = "request_detail", nullable = true, columnDefinition = "TEXT")
+    private String requestDetail;
+
+    @Column(name = "channel", nullable = false)
+    private LeadChannel leadChannel;
 
     @Column(name = "assigned_adviser_id", nullable = true)
     private UUID assignedAdviserId;

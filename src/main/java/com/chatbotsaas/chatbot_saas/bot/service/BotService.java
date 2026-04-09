@@ -4,9 +4,11 @@ import com.chatbotsaas.chatbot_saas.bot.dto.request.RegisterBotDto;
 import com.chatbotsaas.chatbot_saas.bot.dto.response.ResponseBotDto;
 import com.chatbotsaas.chatbot_saas.bot.entity.Bot;
 import com.chatbotsaas.chatbot_saas.bot.repository.BotRepository;
+import com.chatbotsaas.chatbot_saas.shared.exception.AppException;
 import com.chatbotsaas.chatbot_saas.tenant.entity.Tenant;
 import com.chatbotsaas.chatbot_saas.tenant.repository.TenantRepository;
 import com.chatbotsaas.chatbot_saas.user.repository.UserRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,6 +68,19 @@ public class BotService {
                 () -> new IllegalArgumentException("El bot no existe")
         );
         botRepository.deleteById(botId);
+    }
+
+    @Transactional
+    public ResponseBotDto getBotById(UUID botId) {
+        Bot bot = botRepository.findById(botId).orElseThrow(
+                () -> new AppException("Bot not found", HttpStatus.NOT_FOUND)
+        );
+
+        return new ResponseBotDto(
+                bot.getName(),
+                bot.getDescription(),
+                bot.getIsActive()
+        );
     }
 
 }

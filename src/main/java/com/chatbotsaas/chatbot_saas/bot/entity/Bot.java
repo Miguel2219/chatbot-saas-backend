@@ -32,6 +32,9 @@ public class Bot {
     @Column(name = "description", nullable = false)
     private String description;
 
+    @Column(name = "system_prompt", nullable = true, columnDefinition = "TEXT")
+    private String systemPrompt;
+
     @Column(name = "is_active")
     private Boolean isActive;
 

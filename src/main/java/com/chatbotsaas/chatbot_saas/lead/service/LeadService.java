@@ -66,6 +66,8 @@ public class LeadService {
                     .email(requestDto.getEmail())
                     .assignedAdviserId(assignedAdviser.getUserId())
                     .status(LeadStatus.PENDING)
+                    .requestDetail(requestDto.getRequestDetail())
+                    .leadChannel(requestDto.getLeadChannel())
                     .build()
         );
 

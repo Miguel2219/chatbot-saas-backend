@@ -40,12 +40,12 @@ public class ConversationService {
                 () -> new IllegalArgumentException("Bot not found")
         );
         Conversation conversation = conversationRepository.save(
-                    Conversation.builder()
-                            .botId(request.getBotId())
-                            .sessionId(request.getSessionId())
-                            .role(request.getRole())
-                            .message(request.getMessage())
-                            .build()
+                    Conversation.create(
+                            request.getBotId(),
+                            request.getSessionId(),
+                            request.getRole(),
+                            request.getMessage()
+                    )
         );
         return toResponseDto(conversation);
     }

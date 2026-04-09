@@ -1,5 +1,6 @@
 package com.chatbotsaas.chatbot_saas.chat.service;
 
+import com.chatbotsaas.chatbot_saas.bot.entity.Bot;
 import com.chatbotsaas.chatbot_saas.bot.repository.BotRepository;
 import com.chatbotsaas.chatbot_saas.chat.dto.request.ChatRequestDto;
 import com.chatbotsaas.chatbot_saas.chat.dto.response.ChatResponseDto;
@@ -10,6 +11,7 @@ import com.chatbotsaas.chatbot_saas.integration.dto.request.ChatRequest;
 import com.chatbotsaas.chatbot_saas.integration.dto.response.ChatResponsePythonDto;
 import com.chatbotsaas.chatbot_saas.lead.dto.request.LeadRequestDto;
 import com.chatbotsaas.chatbot_saas.lead.dto.response.LeadDataDto;
+import com.chatbotsaas.chatbot_saas.lead.enums.LeadChannel;
 import com.chatbotsaas.chatbot_saas.lead.service.LeadService;
 import com.chatbotsaas.chatbot_saas.shared.exception.AppException;
 import org.springframework.http.HttpStatus;
@@ -32,7 +34,7 @@ public class ChatService {
 
     @Transactional
     public ChatResponseDto sendMessage(ChatRequestDto request) {
-        botRepository.findById(request.getBotId()).orElseThrow(
+        Bot bot = botRepository.findById(request.getBotId()).orElseThrow(
                 () -> new AppException("Bot not found", HttpStatus.NOT_FOUND)
         );
 
@@ -50,6 +52,7 @@ public class ChatService {
                 .botId(request.getBotId())
                 .message(request.getMessage())
                 .sessionId(request.getSessionId())
+                .systemPrompt(bot.getSystemPrompt())
                 .build()
         );
 
@@ -57,11 +60,13 @@ public class ChatService {
             LeadDataDto leadData = response.getLeadData();
 
             leadService.saveLead(LeadRequestDto.builder()
-                            .botId(request.getBotId())
-                            .sessionId(request.getSessionId())
-                            .name(leadData.getName())
-                            .phone(leadData.getPhone())
-                            .email(leadData.getEmail())
+                    .botId(request.getBotId())
+                    .sessionId(request.getSessionId())
+                    .name(leadData.getName())
+                    .phone(leadData.getPhone())
+                    .email(leadData.getEmail())
+                    .requestDetail(response.getRequestDetail())
+                    .leadChannel(LeadChannel.WIDGET)
                     .build());
         }
 

@@ -18,5 +18,9 @@ public class ChatResponsePythonDto {
     @JsonProperty(value = "lead_data")
     private LeadDataDto leadData;
 
+    @JsonProperty(value = "request_detail")
+    private String requestDetail;
 
+    @JsonProperty(value = "cede_control")
+    private Boolean cedeControl;
 }

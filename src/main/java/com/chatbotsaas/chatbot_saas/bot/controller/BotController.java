@@ -38,4 +38,11 @@ public class BotController {
     ) {
         return new ResponseEntity<>(botService.getBotByTenant(tenantId), HttpStatus.OK);
     }
+
+    @GetMapping("/{bot_id}")
+    public ResponseEntity<ResponseBotDto> getBot(
+            @PathVariable(name = "bot_id") UUID botId
+    ) {
+        return new ResponseEntity<>(botService.getBotById(botId), HttpStatus.OK);
+    }
 }

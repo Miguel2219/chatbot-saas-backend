@@ -14,9 +14,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class PythonRagClient {
     private final WebClient webClient;
 
-    public PythonRagClient(@Value("${app.python-service-url}") String pythonUrl) {
+    public PythonRagClient(@Value("${app.python-service-url}") String pythonUrl, @Value("${app.internal-api-key}") String internalApiKey) {
         this.webClient = WebClient.builder()
                 .baseUrl(pythonUrl)
+                .defaultHeader("X-Internal-Key", internalApiKey)
                 .build();
     }
 
