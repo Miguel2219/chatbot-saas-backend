@@ -5,16 +5,19 @@ import com.chatbotsaas.chatbot_saas.chat.dto.response.ChatResponseDto;
 import com.chatbotsaas.chatbot_saas.chat.service.ChatService;
 import com.chatbotsaas.chatbot_saas.conversation.enums.ConversationStatus;
 import com.chatbotsaas.chatbot_saas.conversation.repository.ConversationRepository;
+import com.chatbotsaas.chatbot_saas.conversation.service.ConversationService;
+import com.chatbotsaas.chatbot_saas.lead.dto.response.LeadDataDto;
 import com.chatbotsaas.chatbot_saas.lead.service.LeadService;
-import com.chatbotsaas.chatbot_saas.notification.service.NotificationService;
 import com.chatbotsaas.chatbot_saas.whatsapp.dto.WhatsappWebhookPayloadDto;
 import com.chatbotsaas.chatbot_saas.whatsapp.dto.request.SendMessageRequestDto;
 import com.chatbotsaas.chatbot_saas.whatsapp.entity.WhatsappConfig;
 import com.chatbotsaas.chatbot_saas.whatsapp.repository.WhatsappConfigRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+@Slf4j  // ← add this
 @Service
 public class WhatsappService {
     private final WebClient.Builder webClientBuilder;
@@ -22,15 +25,15 @@ public class WhatsappService {
     private final ConversationRepository conversationRepository;
     private final ChatService chatService;
     private final LeadService leadService;
-    private final NotificationService notificationService;
+    private final ConversationService conversationService;
 
-    public WhatsappService(WebClient.Builder webClientBuilder, WhatsappConfigRepository whatsappConfigRepository, ConversationRepository conversationRepository, ChatService chatService, LeadService leadService, NotificationService notificationService) {
+    public WhatsappService(WebClient.Builder webClientBuilder, WhatsappConfigRepository whatsappConfigRepository, ConversationRepository conversationRepository, ChatService chatService, LeadService leadService, ConversationService conversationService) {
         this.webClientBuilder = webClientBuilder;
         this.whatsappConfigRepository = whatsappConfigRepository;
         this.conversationRepository = conversationRepository;
         this.chatService = chatService;
         this.leadService = leadService;
-        this.notificationService = notificationService;
+        this.conversationService = conversationService;
     }
 
     private void sendToWhatsapp(String apiKey, SendMessageRequestDto request) {
@@ -100,7 +103,54 @@ public class WhatsappService {
                         .build()
         );
 
-        sendMessage(config.getApiKey(), userPhone, response.getResponse());
+        // Step 1 — Send AI response to user
+        try {
+            sendMessage(config.getApiKey(), userPhone, response.getResponse());
+        } catch (Exception e) {
+            log.error("[WhatsApp] Failed to send message to {}: {}", userPhone, e.getMessage());
+            return;
+        }
+
+        // Step 2 — Save lead if captured
+        if (Boolean.TRUE.equals(response.getLeadCaptured())
+                && response.getLeadData() != null
+                && response.getLeadData().getName() != null) {
+            leadService.saveLeadWhatsapp(
+                    config.getBot().getBotId(),
+                    userPhone,
+                    response.getLeadData(),
+                    response.getRequestDetail()
+            );
+        }
+
+        // Step 3 — If cede_control, update status and send internal note
+        if (Boolean.TRUE.equals(response.getCedeControl())) {
+            conversationService.updateStatus(
+                    config.getBot().getBotId(),
+                    userPhone,
+                    ConversationStatus.PENDING_HUMAN
+            );
+
+            String note;
+            if (Boolean.TRUE.equals(response.getLeadCaptured()) && response.getLeadData() != null) {
+                LeadDataDto lead = response.getLeadData();
+                note = "🔴 Intervention required.\n"
+                        + "🤖 Bot has finished this conversation.\n"
+                        + "📋 Summary: " + (response.getRequestDetail() != null ? response.getRequestDetail() : "No summary available") + "\n"
+                        + "👤 Contact: " + lead.getName()
+                        + " | " + (lead.getPhone() != null ? lead.getPhone() : "N/A")
+                        + " | " + (lead.getEmail() != null ? lead.getEmail() : "N/A") + "\n"
+                        + "Please take over this conversation.";
+            } else {
+                note = "🔴 Intervention required.\n"
+                        + "🤖 Bot could not answer from available context.\n"
+                        + (response.getRequestDetail() != null ? "📋 Summary: " + response.getRequestDetail() + "\n" : "")
+                        + "User needs assistance beyond the bot's knowledge.\n"
+                        + "Please take over this conversation.";
+            }
+
+            sendInternalNote(config.getApiKey(), userPhone, note);
+        }
 
     }
 

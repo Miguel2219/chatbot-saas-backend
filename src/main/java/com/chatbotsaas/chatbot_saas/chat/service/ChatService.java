@@ -9,10 +9,6 @@ import com.chatbotsaas.chatbot_saas.conversation.service.ConversationService;
 import com.chatbotsaas.chatbot_saas.integration.PythonRagClient;
 import com.chatbotsaas.chatbot_saas.integration.dto.request.ChatRequest;
 import com.chatbotsaas.chatbot_saas.integration.dto.response.ChatResponsePythonDto;
-import com.chatbotsaas.chatbot_saas.lead.dto.request.LeadRequestDto;
-import com.chatbotsaas.chatbot_saas.lead.dto.response.LeadDataDto;
-import com.chatbotsaas.chatbot_saas.lead.enums.LeadChannel;
-import com.chatbotsaas.chatbot_saas.lead.service.LeadService;
 import com.chatbotsaas.chatbot_saas.shared.exception.AppException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,13 +19,11 @@ public class ChatService {
     private final ConversationService conversationService;
     private final BotRepository botRepository;
     private final PythonRagClient pythonRagClient;
-    private final LeadService leadService;
 
-    public ChatService(ConversationService conversationService, BotRepository botRepository, PythonRagClient pythonRagClient, LeadService leadService) {
+    public ChatService(ConversationService conversationService, BotRepository botRepository, PythonRagClient pythonRagClient) {
         this.conversationService = conversationService;
         this.botRepository = botRepository;
         this.pythonRagClient = pythonRagClient;
-        this.leadService = leadService;
     }
 
     @Transactional
@@ -56,20 +50,6 @@ public class ChatService {
                 .build()
         );
 
-        if (response.getLeadCaptured() && response.getLeadData() != null) {
-            LeadDataDto leadData = response.getLeadData();
-
-            leadService.saveLead(LeadRequestDto.builder()
-                    .botId(request.getBotId())
-                    .sessionId(request.getSessionId())
-                    .name(leadData.getName())
-                    .phone(leadData.getPhone())
-                    .email(leadData.getEmail())
-                    .requestDetail(response.getRequestDetail())
-                    .leadChannel(LeadChannel.WIDGET)
-                    .build());
-        }
-
         // Save the AI response in Conversation
         conversationService.saveMessage(ConversationRequestDto.builder()
                 .botId(request.getBotId())
@@ -82,6 +62,10 @@ public class ChatService {
         return ChatResponseDto.builder()
                 .sessionId(request.getSessionId())
                 .response(response.getResponse())
+                .leadCaptured(response.getLeadCaptured())
+                .leadData(response.getLeadData())
+                .requestDetail(response.getRequestDetail())
+                .cedeControl(response.getCedeControl())
                 .build();
     }
 }

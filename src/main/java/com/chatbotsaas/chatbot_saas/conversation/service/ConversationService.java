@@ -4,6 +4,7 @@ import com.chatbotsaas.chatbot_saas.bot.repository.BotRepository;
 import com.chatbotsaas.chatbot_saas.conversation.dto.request.ConversationRequestDto;
 import com.chatbotsaas.chatbot_saas.conversation.dto.response.ConversationResponseDto;
 import com.chatbotsaas.chatbot_saas.conversation.entity.Conversation;
+import com.chatbotsaas.chatbot_saas.conversation.enums.ConversationStatus;
 import com.chatbotsaas.chatbot_saas.conversation.repository.ConversationRepository;
 import com.chatbotsaas.chatbot_saas.shared.exception.AppException;
 import org.springframework.http.HttpStatus;
@@ -69,5 +70,14 @@ public class ConversationService {
         return conversations.stream().map(
                 this::toResponseDto
         ).toList();
+    }
+
+    @Transactional
+    public void updateStatus(UUID botId, String sessionId, ConversationStatus newStatus) {
+        conversationRepository.findTopByBotIdAndSessionIdOrderByCreatedAtDesc(botId, sessionId)
+                .ifPresent(conversation -> {
+                    conversation.setStatus(newStatus);
+                    conversationRepository.save(conversation);
+                });
     }
 }
