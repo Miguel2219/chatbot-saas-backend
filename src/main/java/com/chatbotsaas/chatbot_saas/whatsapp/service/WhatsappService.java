@@ -12,10 +12,12 @@ import com.chatbotsaas.chatbot_saas.whatsapp.dto.WhatsappWebhookPayloadDto;
 import com.chatbotsaas.chatbot_saas.whatsapp.dto.request.SendMessageRequestDto;
 import com.chatbotsaas.chatbot_saas.whatsapp.entity.WhatsappConfig;
 import com.chatbotsaas.chatbot_saas.whatsapp.repository.WhatsappConfigRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+@Slf4j  // ← add this
 @Service
 public class WhatsappService {
     private final WebClient.Builder webClientBuilder;
@@ -102,7 +104,12 @@ public class WhatsappService {
         );
 
         // Step 1 — Send AI response to user
-        sendMessage(config.getApiKey(), userPhone, response.getResponse());
+        try {
+            sendMessage(config.getApiKey(), userPhone, response.getResponse());
+        } catch (Exception e) {
+            log.error("[WhatsApp] Failed to send message to {}: {}", userPhone, e.getMessage());
+            return;
+        }
 
         // Step 2 — Save lead if captured
         if (Boolean.TRUE.equals(response.getLeadCaptured())
