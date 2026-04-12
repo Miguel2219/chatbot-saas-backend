@@ -29,7 +29,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/webhook/whatsapp").permitAll()
+                        .requestMatchers("/webhook/whatsapp/**").permitAll()
                         .requestMatchers("/**").permitAll() //TODO -> Solo usar para pruebas
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated())
