@@ -3,8 +3,10 @@ package com.chatbotsaas.chatbot_saas.lead.service;
 import com.chatbotsaas.chatbot_saas.bot.entity.Bot;
 import com.chatbotsaas.chatbot_saas.bot.repository.BotRepository;
 import com.chatbotsaas.chatbot_saas.lead.dto.request.LeadRequestDto;
+import com.chatbotsaas.chatbot_saas.lead.dto.response.LeadDataDto;
 import com.chatbotsaas.chatbot_saas.lead.dto.response.LeadResponseDto;
 import com.chatbotsaas.chatbot_saas.lead.entity.Lead;
+import com.chatbotsaas.chatbot_saas.lead.enums.LeadChannel;
 import com.chatbotsaas.chatbot_saas.lead.enums.LeadStatus;
 import com.chatbotsaas.chatbot_saas.lead.repository.LeadRepository;
 import com.chatbotsaas.chatbot_saas.notification.service.NotificationService;
@@ -97,5 +99,20 @@ public class LeadService {
         leadRepository.save(lead);
     }
 
-
+    @Transactional
+    public void saveLeadWhatsapp(UUID botId, String sessionId, LeadDataDto leadData, String requestDetail) {
+        leadRepository.save(
+                Lead.builder()
+                        .botId(botId)
+                        .sessionId(sessionId)
+                        .name(leadData.getName())
+                        .phone(leadData.getPhone())
+                        .email(leadData.getEmail())
+                        .assignedAdviserId(null)
+                        .status(LeadStatus.PENDING)
+                        .requestDetail(requestDetail)
+                        .leadChannel(LeadChannel.WHATSAPP)
+                        .build()
+        );
+    }
 }

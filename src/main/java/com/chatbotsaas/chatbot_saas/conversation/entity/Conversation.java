@@ -55,4 +55,7 @@ public class Conversation {
         return new Conversation(botId, sessionId, role, message, ConversationStatus.BOT_ACTIVE);
     }
 
+    public void setStatus(ConversationStatus status) {
+        this.status = status;
+    }
 }

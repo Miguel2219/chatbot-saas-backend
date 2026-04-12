@@ -104,7 +104,7 @@ com.chatbotsaas.chatbot_saas
 │   ├── repository/UserRepository.java
 │   ├── repository/PersonRepository.java
 │   └── service/AdviserService.java
-└── whatsapp/                           ← INCOMPLETE — main focus
+└── whatsapp/
     ├── controller/WhatsappConfigController.java  (TODO)
     ├── controller/WhatsappWebhookController.java (TODO)
     ├── dto/request/CreateWhatsappConfigRequest.java
@@ -114,8 +114,8 @@ com.chatbotsaas.chatbot_saas
     ├── dto/WhatsappWebhookPayloadDto.java
     ├── entity/WhatsappConfig.java
     ├── repository/WhatsappConfigRepository.java
-    └── service/WhatsapConfigService.java             
-    └── service/WhatsappService.java              (TODO)
+    ├── service/WhatsappConfigService.java
+    └── service/WhatsappService.java
 ```
 
 ## Entity Relationships
@@ -193,36 +193,62 @@ spring:
 - CORS configured to allow all origins (development)
 
 
-## Chat Flow (already working)
+## Chat Architecture
+ChatService is a **pure orchestrator** — it calls Python RAG and returns all data.
+Lead saving is the **caller's responsibility**, not ChatService's.
+
+### Widget Flow (ChatController)
 ```
 POST /api/chat
+  → ChatController receives request
   → ChatService.sendMessage()
-  → Save USER message to conversations
-  → Call PythonRagClient.chat()
-  → Python returns: { response, lead_captured, lead_data, request_detail, cede_control }
-  → If lead_captured=true → LeadService.saveLead() → Round Robin → Email notification
-  → Save ASSISTANT message to conversations
-  → Return ChatResponseDto
+    → Save USER message to conversations
+    → Call PythonRagClient.chat()
+    → Save ASSISTANT message to conversations
+    → Return ChatResponseDto { response, lead_captured, lead_data, request_detail, cede_control }
+  → If lead_captured=true → ChatController calls LeadService.saveLead()
+    → Round Robin adviser assignment → Email notification
+  → Return { session_id, response } to frontend (no lead internals exposed)
+```
+
+### WhatsApp Flow (WhatsappService)
+```
+Webhook POST /webhook/whatsapp
+  → WhatsappService.processIncomingMessage() (@Async)
+  → Validate: text message, config exists, conversation is BOT_ACTIVE
+  → ChatService.sendMessage()
+  → Step 1: Send AI response to user via 360dialog sendMessage()
+  → Step 2: If lead_captured=true → LeadService.saveLeadWhatsapp()
+    → No Round Robin, assignedAdviserId=null, no email notifications
+  → Step 3: If cede_control=true:
+    → Update conversation status to PENDING_HUMAN
+    → Send internal note via 360dialog sendInternalNote()
+      (visual signal for adviser to take over)
 ```
 
 ## WhatsApp vs Widget Differences
 | Aspect | Widget | WhatsApp |
 |--------|--------|----------|
 | Lead capture | Mandatory | Optional |
-| Adviser assignment | Round Robin | General notification to all |
+| Adviser assignment | Round Robin (one adviser) | No assignment (assignedAdviserId=null) |
+| Adviser notification | Email via NotificationService | No email — 360dialog internal notes only |
 | Adviser response | Outside (call/email) | Via 360dialog dashboard |
+| Lead saving | ChatController → LeadService.saveLead() | WhatsappService → LeadService.saveLeadWhatsapp() |
 | Conversation status | Not applicable | BOT_ACTIVE → PENDING_HUMAN → HUMAN_ACTIVE |
+| cede_control handling | Not applicable | Updates status + sends internal note to 360dialog |
 
 ## What Needs to Be Finished
 ### High Priority
-1. `WhatsappService` — `sendMessage()`, `processIncomingMessage()`, `sendInternalNote()`
-2. `WhatsappWebhookController` — `GET /webhook/whatsapp` (verification) + `POST /webhook/whatsapp`
-3. `WhatsappConfigController` — CRUD endpoints for managing 360dialog config per bot
-4. `X-Internal-Key` security — add header to all PythonRagClient requests
+1. `WhatsappWebhookController` — `GET /webhook/whatsapp` (verification) + `POST /webhook/whatsapp`
+2. `WhatsappConfigController` — CRUD endpoints for managing 360dialog config per bot
 
 ### Already Complete
 - Auth, Tenant, User, Person, Bot, Document, Conversation, Chat
-- Lead capture with Round Robin and email notifications
+- Widget lead capture with Round Robin and email notifications (ChatController → LeadService.saveLead())
+- WhatsApp lead capture without Round Robin (WhatsappService → LeadService.saveLeadWhatsapp())
+- WhatsappService — sendMessage(), processIncomingMessage(), sendInternalNote()
+- ConversationService.updateStatus() for WhatsApp status transitions
+- ChatService refactored as pure orchestrator (no lead saving)
 - Adviser management with notification channels
 - Exception handling, CORS, JWT security
 
