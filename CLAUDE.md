@@ -105,8 +105,8 @@ com.chatbotsaas.chatbot_saas
 │   ├── repository/PersonRepository.java
 │   └── service/AdviserService.java
 └── whatsapp/
-    ├── controller/WhatsappConfigController.java  (TODO)
-    ├── controller/WhatsappWebhookController.java (TODO)
+    ├── controller/WhatsappConfigController.java
+    ├── controller/WhatsappWebhookController.java
     ├── dto/request/CreateWhatsappConfigRequest.java
     ├── dto/request/SendMessageRequestDto.java
     ├── dto/request/WhatsappMessageRequestDto.java
@@ -238,10 +238,6 @@ Webhook POST /webhook/whatsapp
 | cede_control handling | Not applicable | Updates status + sends internal note to 360dialog |
 
 ## What Needs to Be Finished
-### High Priority
-1. `WhatsappWebhookController` — `GET /webhook/whatsapp` (verification) + `POST /webhook/whatsapp`
-2. `WhatsappConfigController` — CRUD endpoints for managing 360dialog config per bot
-
 ### Already Complete
 - Auth, Tenant, User, Person, Bot, Document, Conversation, Chat
 - Widget lead capture with Round Robin and email notifications (ChatController → LeadService.saveLead())
@@ -251,6 +247,8 @@ Webhook POST /webhook/whatsapp
 - ChatService refactored as pure orchestrator (no lead saving)
 - Adviser management with notification channels
 - Exception handling, CORS, JWT security
+- WhatsappWebhookController — GET verification + POST webhook
+- WhatsappConfigController — CRUD endpoints for 360dialog config per bot
 
 ## Rules for Claude Code Sessions
 - Read existing code in the relevant package BEFORE writing anything new

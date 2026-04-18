@@ -9,6 +9,8 @@ import com.chatbotsaas.chatbot_saas.integration.dto.request.DeleteDocumentReques
 import com.chatbotsaas.chatbot_saas.integration.dto.request.ProcessDocumentRequest;
 import com.chatbotsaas.chatbot_saas.shared.exception.AppException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,7 @@ import java.util.UUID;
 
 @Service
 public class DocumentService {
+
     private final DocumentRepository documentRepository;
     private final BotRepository botRepository;
     private final PythonRagClient pythonRagClient;
@@ -75,9 +78,9 @@ public class DocumentService {
     }
 
     @Transactional(readOnly = true)
-    public List<DocumentResponseDto> getDocumentsByBotId(UUID botId) {
-        List<Document> documents = documentRepository.findByBotId(botId);
-        return documents.stream().map(document ->
+    public Page<DocumentResponseDto> getDocumentsByBotId(UUID botId, Pageable pageable) {
+        Page<Document> documents = documentRepository.findByBotId(botId, pageable);
+        return documents.map(document ->
                 DocumentResponseDto.builder()
                         .documentId(document.getDocumentId())
                         .fileName(document.getFileName())
@@ -85,7 +88,7 @@ public class DocumentService {
                         .fileType(document.getFileType())
                         .createdAt(document.getCreatedAt())
                         .build()
-        ).toList();
+        );
     }
 
     @Transactional

@@ -7,6 +7,8 @@ import com.chatbotsaas.chatbot_saas.conversation.entity.Conversation;
 import com.chatbotsaas.chatbot_saas.conversation.enums.ConversationStatus;
 import com.chatbotsaas.chatbot_saas.conversation.repository.ConversationRepository;
 import com.chatbotsaas.chatbot_saas.shared.exception.AppException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,16 +54,14 @@ public class ConversationService {
     }
 
     @Transactional
-    public List<ConversationResponseDto> getConversationByBot(UUID botId) {
+    public Page<ConversationResponseDto> getConversationByBot(UUID botId, Pageable pageable) {
         botRepository.findById(botId).orElseThrow(
                 () -> new IllegalArgumentException("Bot not found")
         );
-        List<Conversation> conversations = conversationRepository.findByBotIdOrderByCreatedAtAsc(botId);
-        return conversations.stream().map(
-                this::toResponseDto
-        ).toList();
+        return conversationRepository.findByBotIdOrderByCreatedAtAsc(botId, pageable).map(this::toResponseDto);
     }
 
+    @Transactional
     public List<ConversationResponseDto> getConversationBySession(String sessionId) {
         if (!conversationRepository.existsBySessionId(sessionId)) {
             throw new AppException("session not found", HttpStatus.NOT_FOUND);

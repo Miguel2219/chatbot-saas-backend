@@ -37,6 +37,12 @@ public class WhatsappService {
     }
 
     private void sendToWhatsapp(String apiKey, SendMessageRequestDto request) {
+        //TODO - Usar para prueba
+        if (apiKey.equals("test-api")) {
+            log.info("[WhatsApp MOCK] Would send: {}", request.getText().getBody());
+            return;
+        }
+
         webClientBuilder.build()
                 .post()
                 .uri("https://waba.360dialog.io/v1/messages")
@@ -102,6 +108,8 @@ public class WhatsappService {
                         .message(messageText)
                         .build()
         );
+
+        log.info("[Python MOCKUP] Wrote response: {}", response);
 
         // Step 1 — Send AI response to user
         try {

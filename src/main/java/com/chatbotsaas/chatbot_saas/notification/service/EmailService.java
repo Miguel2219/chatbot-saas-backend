@@ -41,4 +41,37 @@ public class EmailService {
             System.err.println("Failed to send email to "+ toEmail + ": " + e.getMessage());
         }
     }
+
+    public void sendWelcomeEmail(String toEmail, String tempPassword, String tenantName) {
+        try {
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(toEmail);
+            helper.setSubject("Bienvenido a " + tenantName + " — Tus credenciales de acceso");
+
+            String body = """
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2>¡Bienvenido a la plataforma!</h2>
+                    <p>Tu cuenta ha sido creada exitosamente para <strong>%s</strong>.</p>
+                    <p>Aquí están tus credenciales de acceso:</p>
+                    <div style="background: #f5f5f5; padding: 16px; border-radius: 8px; margin: 16px 0;">
+                        <p><strong>Email:</strong> %s</p>
+                        <p><strong>Contraseña temporal:</strong> %s</p>
+                    </div>
+                    <p style="color: #e74c3c;">
+                        <strong>Importante:</strong> Al ingresar por primera vez se te pedirá 
+                        cambiar tu contraseña.
+                    </p>
+                    <p>Si tienes algún problema para acceder, contacta al administrador.</p>
+                </div>
+                """.formatted(tenantName, toEmail, tempPassword);
+
+            helper.setText(body, true);
+            javaMailSender.send(message);
+
+        } catch (MessagingException e) {
+            System.err.println("Failed to send welcome email to " + toEmail + ": " + e.getMessage());
+        }
+    }
 }

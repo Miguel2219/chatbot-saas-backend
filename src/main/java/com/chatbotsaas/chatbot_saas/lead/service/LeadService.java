@@ -12,6 +12,7 @@ import com.chatbotsaas.chatbot_saas.lead.repository.LeadRepository;
 import com.chatbotsaas.chatbot_saas.notification.service.NotificationService;
 import com.chatbotsaas.chatbot_saas.shared.exception.AppException;
 import com.chatbotsaas.chatbot_saas.user.entity.User;
+import com.chatbotsaas.chatbot_saas.user.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,21 +25,31 @@ public class LeadService {
     private final LeadRepository leadRepository;
     private final BotRepository botRepository;
     private final NotificationService notificationService;
+    private final UserRepository userRepository;
 
-    public LeadService(LeadRepository leadRepository, BotRepository botRepository, NotificationService notificationService) {
+    public LeadService(LeadRepository leadRepository, BotRepository botRepository, NotificationService notificationService, UserRepository userRepository) {
         this.leadRepository = leadRepository;
         this.botRepository = botRepository;
         this.notificationService = notificationService;
+        this.userRepository = userRepository;
     }
 
     private LeadResponseDto leadToResponseDto (Lead lead) {
+        String adviserName = null;
+
+        if (lead.getAssignedAdviserId() != null) {
+            adviserName = userRepository.findById(lead.getAssignedAdviserId())
+                    .map(user -> user.getPerson().getName())
+                    .orElse(null);
+        }
         return LeadResponseDto.builder()
                 .id(lead.getLeadId())
                 .name(lead.getName())
                 .phone(lead.getPhone())
                 .email(lead.getEmail())
                 .status(lead.getStatus())
-                .assignedAdviserId(lead.getAssignedAdviserId())
+                .channel(lead.getLeadChannel())
+                .assignedAdviser(adviserName)
                 .createdAt(lead.getCreatedAt())
                 .build();
     }
