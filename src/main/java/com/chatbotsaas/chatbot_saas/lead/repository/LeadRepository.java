@@ -12,4 +12,9 @@ public interface LeadRepository extends JpaRepository<Lead, UUID> {
     List<Lead> findByBotIdAndStatus(UUID botId, String status);
 
     List<Lead> findByAssignedAdviserId(String assignedAdviserId);
+
+    // Total leads
+    Long countBy();
+
+
 }

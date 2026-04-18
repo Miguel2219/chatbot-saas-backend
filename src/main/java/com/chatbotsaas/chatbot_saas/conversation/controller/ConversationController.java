@@ -5,6 +5,10 @@ import com.chatbotsaas.chatbot_saas.conversation.dto.response.ConversationRespon
 import com.chatbotsaas.chatbot_saas.conversation.service.ConversationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,10 +30,19 @@ public class ConversationController {
     }
 
     @GetMapping("/bot/{bot_id}")
-    public ResponseEntity<List<ConversationResponseDto>> getConversationsByBot(
-            @PathVariable(name = "bot_id") UUID botId
-    ) {
-        return new ResponseEntity<>(conversationService.getConversationByBot(botId), HttpStatus.OK);
+    public ResponseEntity<Page<ConversationResponseDto>> getConversationsByBot(
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "10") int limit,
+            @RequestParam(defaultValue = "createdAt") String order_by,
+            @RequestParam(defaultValue = "desc") String order,
+            @PathVariable(value = "bot_id") UUID botId
+    )
+    {
+        Pageable pageable = order.equalsIgnoreCase("desc")
+                ? PageRequest.of(offset, limit, Sort.by(order_by).descending())
+                : PageRequest.of(offset, limit, Sort.by(order_by).ascending());
+
+        return new ResponseEntity<>(conversationService.getConversationByBot(botId, pageable), HttpStatus.OK);
     }
 
     @GetMapping("/session/{session_id}")

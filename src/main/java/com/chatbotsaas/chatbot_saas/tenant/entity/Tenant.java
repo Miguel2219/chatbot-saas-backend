@@ -1,18 +1,18 @@
 package com.chatbotsaas.chatbot_saas.tenant.entity;
 
+import com.chatbotsaas.chatbot_saas.tenant.enums.ImplementationType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity //Tells that this class represents a database table
 @Table(name = "tenants")
-@Data //automatically generates getters and setters
-@NoArgsConstructor //generates an empty constructor. JPA requires this
-@AllArgsConstructor //generates a constructor with all fields
+@Getter
+@NoArgsConstructor
 public class Tenant {
 
     @Id // marks which field is the primary key
@@ -33,8 +33,23 @@ public class Tenant {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @Column(name = "implementation_type")
+    @Enumerated(EnumType.STRING)
+    private ImplementationType implementationType;
+
     @PrePersist //It sets createdAt automatically every time you save a new Tenant, so you never have to set it manually
     public void prePersist() {
         this.createdAt = LocalDateTime.now(); //Sets the date automatically on creation
+    }
+
+    public Tenant(String name, String email, Boolean isActive,  ImplementationType implementationType) {
+        this.name = name;
+        this.email = email;
+        this.isActive = isActive;
+        this.implementationType = implementationType;
+    }
+
+    public static Tenant create(String name, String email, ImplementationType implementationType) {
+        return new Tenant(name, email, Boolean.TRUE, implementationType);
     }
 }

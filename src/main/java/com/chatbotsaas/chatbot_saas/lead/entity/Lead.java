@@ -43,6 +43,7 @@ public class Lead {
     private String requestDetail;
 
     @Column(name = "channel", nullable = false)
+    @Enumerated(EnumType.STRING)
     private LeadChannel leadChannel;
 
     @Column(name = "assigned_adviser_id", nullable = true)

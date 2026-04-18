@@ -4,6 +4,10 @@ import com.chatbotsaas.chatbot_saas.document.dto.response.DocumentResponseDto;
 import com.chatbotsaas.chatbot_saas.document.service.DocumentService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,10 +33,17 @@ public class DocumentController {
     }
 
     @GetMapping("/{bot_id}")
-    public ResponseEntity<List<DocumentResponseDto>> getDocumentsByBotId(
+    public ResponseEntity<Page<DocumentResponseDto>> getDocumentsByBotId(
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "10") int limit,
+            @RequestParam(defaultValue = "createdAt") String order_by,
+            @RequestParam(defaultValue = "desc") String order,
             @PathVariable(name = "bot_id") UUID botId
     ) {
-       return ResponseEntity.ok(documentService.getDocumentsByBotId(botId));
+        Pageable pageable = order.equalsIgnoreCase("desc")
+                ? PageRequest.of(offset, limit, Sort.by(order_by).descending())
+                : PageRequest.of(offset, limit, Sort.by(order_by).ascending());
+       return new ResponseEntity<>(documentService.getDocumentsByBotId(botId, pageable), HttpStatus.OK);
     }
 
     @DeleteMapping("/{document_id}")

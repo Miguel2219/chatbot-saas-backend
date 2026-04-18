@@ -1,24 +1,31 @@
 package com.chatbotsaas.chatbot_saas.auth.dto;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 
+import java.util.List;
 import java.util.UUID;
 
-@Data
+@Getter
+@Builder
+@AllArgsConstructor
 public class RegisterRequest {
-
-    @NotBlank
-    @Email
     private String email;
 
-    @NotBlank
     private String password;
 
-    @NotNull
-    private UUID tenantId;
+    private String name;
 
+    private String lastname;
+
+    private String phone;
+
+    @JsonProperty(value = "number_document")
+    private String numberDocument;
+
+    @JsonProperty("role_ids")
+    private List<UUID> roleIds;
 
 }

@@ -1,5 +1,6 @@
 package com.chatbotsaas.chatbot_saas.lead.dto.response;
 
+import com.chatbotsaas.chatbot_saas.lead.enums.LeadChannel;
 import com.chatbotsaas.chatbot_saas.lead.enums.LeadStatus;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
@@ -30,6 +31,14 @@ public class LeadResponseDto {
     @JsonProperty(value = "assigned_adviser_id")
     private UUID assignedAdviserId;
 
+    @JsonProperty(value = "assigned_adviser")
+    private String assignedAdviser;
+
+    @JsonProperty(value = "channel")
+    private LeadChannel channel;
+
     @JsonProperty(value = "created_at")
     private LocalDateTime createdAt;
+
+
 }

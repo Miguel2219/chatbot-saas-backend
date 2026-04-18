@@ -2,6 +2,8 @@ package com.chatbotsaas.chatbot_saas.user.repository;
 
 import com.chatbotsaas.chatbot_saas.role.constant.RoleConstants;
 import com.chatbotsaas.chatbot_saas.user.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -16,8 +18,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     Optional<User> findByEmail(String email);
 
-    List<User> findByTenant_IdAndRole(UUID tenantId, RoleConstants role);
+    Page<User> findByTenant_Id(UUID tenantId, Pageable pageable);
 
-    Optional<User> findUsersByUserIdAndRole(UUID userId, RoleConstants role);
-
+    Optional<User> findUsersByUserIdAndRoles(UUID userId, RoleConstants role);
 }
