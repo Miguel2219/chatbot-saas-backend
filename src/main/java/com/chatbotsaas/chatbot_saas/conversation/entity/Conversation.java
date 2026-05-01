@@ -34,6 +34,7 @@ public class Conversation {
     @Column(name = "message", nullable = false, columnDefinition = "TEXT")
     private String message;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private ConversationStatus status;
 

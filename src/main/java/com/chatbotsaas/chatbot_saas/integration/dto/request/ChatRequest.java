@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -20,4 +21,7 @@ public class ChatRequest {
 
     @JsonProperty(value = "system_prompt")
     private String systemPrompt;
+
+    @JsonProperty(value = "chat_history")
+    private List<ChatMessageDto> chatHistory;
 }

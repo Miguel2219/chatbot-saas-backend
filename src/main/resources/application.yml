@@ -1,3 +1,90 @@
 spring:
   profiles:
     active: dev
+
+  # ── Datasource ─────────────────────────────────────────────────────────────
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/chatbot_saas}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD}     # secret — sin default
+
+  # ── JPA / Hibernate ────────────────────────────────────────────────────────
+  jpa:
+    hibernate:
+      ddl-auto: validate         # constante: Flyway maneja DDL
+    show-sql: ${JPA_SHOW_SQL:false}
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  # ── Flyway ─────────────────────────────────────────────────────────────────
+  flyway:
+    enabled: true                # constantes
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    baseline-version: 2
+
+  # ── Multipart / uploads ────────────────────────────────────────────────────
+  servlet:
+    multipart:
+      max-file-size: 10MB        # constantes
+      max-request-size: 50MB
+
+  # ── SMTP (Gmail por default) ───────────────────────────────────────────────
+  resend:
+    api-key: ${RESEND_API_KEY}
+
+# ── Frontend / CORS ──────────────────────────────────────────────────────────
+# Dominio del panel — usado por CorsConfig (whitelist) y por EmailService
+# (links absolutos en plantillas). Sin default → fail-fast.
+settings:
+  url:
+    front: ${APP_FRONT_URL}
+
+# ── JWT ──────────────────────────────────────────────────────────────────────
+# secret: clave HMAC del access token. Las expiraciones son políticas del
+# producto, fijas en el código (no se exponen como env var).
+jwt:
+  secret: ${JWT_SECRET}                    # secret — sin default
+  access-token-expiration-ms: 3600000      # 1 h
+  refresh-token-expiration-ms: 604800000   # 7 días
+  refresh-token-cleanup-grace-days: 30
+
+# ── Server ───────────────────────────────────────────────────────────────────
+server:
+  servlet:
+    context-path: /app           # constante
+  port: ${SERVER_PORT:8080}
+
+# ── App-specific ─────────────────────────────────────────────────────────────
+app:
+  python-service-url: ${PYTHON_SERVICE_URL:http://localhost:8000}
+  internal-api-key: ${INTERNAL_API_KEY}    # secret — shared con el RAG
+  upload-dir: ${APP_UPLOAD_DIR:uploads}
+
+  whatsapp:
+    verify-token: ${APP_WHATSAPP_VERIFY_TOKEN}    # secret
+    app-secret: ${APP_WHATSAPP_APP_SECRET}        # secret
+    graph-api-version: ${APP_WHATSAPP_GRAPH_API_VERSION:v20.0}
+
+  # Política del flujo "forgot password" — fijos en el producto.
+  password-reset:
+    token-expiration-ms: 3600000     # 1 h
+    rate-limit-window-min: 15
+    rate-limit-max-attempts: 3
+    cleanup-grace-days: 7
+
+# ── Branding / Zolvion ───────────────────────────────────────────────────────
+zolvion:
+  admin-email: ${ZOLVION_ADMIN_EMAIL}        # PII — sin default
+
+# ── OpenAPI / Swagger ────────────────────────────────────────────────────────
+# En dev: habilitado (Swagger UI en /app/swagger-ui).
+# En prod: setear SPRINGDOC_ENABLED=false para ocultar UI + endpoint de docs.
+# No es secret crítico (endpoints siguen detrás de JWT) pero evita mapa
+# público de la API para atacantes.
+springdoc:
+  api-docs:
+    enabled: ${SPRINGDOC_ENABLED:true}
+  swagger-ui:
+    enabled: ${SPRINGDOC_ENABLED:true}

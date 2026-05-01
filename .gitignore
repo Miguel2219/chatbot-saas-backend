@@ -33,7 +33,6 @@ build/
 .vscode/
 
 ### Sensitive files ###
-application-dev.yml
 uploads/
 env/
 .env

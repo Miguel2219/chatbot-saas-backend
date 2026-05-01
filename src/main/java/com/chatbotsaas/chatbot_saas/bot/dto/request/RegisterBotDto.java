@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -20,10 +21,14 @@ public class RegisterBotDto {
     @JsonProperty(value = "tenant_id")
     private UUID tenantID;
 
+    @JsonProperty(value = "lead_assignee_user_ids")
+    private List<UUID> leadAssigneeUserIds;
 
-    public RegisterBotDto (String name, String description, UUID tenantID) {
+
+    public RegisterBotDto (String name, String description, UUID tenantID, List<UUID> leadAssigneeUserIds) {
         this.name = name;
         this.description = description;
         this.tenantID = tenantID;
+        this.leadAssigneeUserIds = leadAssigneeUserIds;
     }
 }

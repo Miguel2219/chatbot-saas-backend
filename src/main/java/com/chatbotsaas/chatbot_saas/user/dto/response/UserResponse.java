@@ -24,8 +24,17 @@ public class UserResponse {
     @JsonProperty("email")
     private String email;
 
+    @JsonProperty("phone")
+    private String phone;
+
+    @JsonProperty("number_document")
+    private String numberDocument;
+
     @JsonProperty("roles")
     private List<String> roles;
+
+    @JsonProperty("role_ids")
+    private List<UUID> roleIds;
 
     @JsonProperty("notification_channel")
     private NotificationChannel notificationChannel;
@@ -39,4 +48,13 @@ public class UserResponse {
     @JsonProperty("tenant_name")
     private String tenantName;
 
+    @JsonProperty("lead_assignee_bots")
+    private List<UserBotRefDto> leadAssigneeBots;
+
+    @Getter
+    @Builder
+    public static class UserBotRefDto {
+        @JsonProperty("bot_id") private UUID botId;
+        @JsonProperty("name")   private String name;
+    }
 }

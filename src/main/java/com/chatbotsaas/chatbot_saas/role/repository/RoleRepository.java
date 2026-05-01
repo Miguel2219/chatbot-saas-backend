@@ -11,4 +11,6 @@ import java.util.UUID;
 public interface RoleRepository extends JpaRepository<Role, UUID> {
 
     List<Role> findAllById(Iterable<UUID> roleIds);
+
+    boolean existsByNameAndRoleIdNot(String name, UUID roleId);
 }

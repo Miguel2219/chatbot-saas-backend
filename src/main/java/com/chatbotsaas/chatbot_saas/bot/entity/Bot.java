@@ -42,16 +42,16 @@ public class Bot {
     @JoinColumn(name = "tenant_id", nullable = false)
     private Tenant tenant;
 
-    @Column(name = "last_adviser_index", nullable = false)
-    private Integer lastAdviserIndex = 0;
+    @Column(name = "last_assignee_index", nullable = false)
+    private Integer lastAssigneeIndex = 0;
 
     @ManyToMany
     @JoinTable(
-            name = "bot_advisers",
+            name = "bot_lead_assignees",
             joinColumns = @JoinColumn(name = "bot_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private List<User> advisers = new ArrayList<>();
+    private List<User> leadAssignees = new ArrayList<>();
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

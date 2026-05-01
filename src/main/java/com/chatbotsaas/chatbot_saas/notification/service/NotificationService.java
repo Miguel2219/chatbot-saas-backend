@@ -14,21 +14,21 @@ public class NotificationService {
         this.emailService = emailService;
     }
 
-    public void notifyAdviser(User adviser, Lead lead, Bot bot) {
-        NotificationChannel channel = adviser.getNotificationChannel();
-        String adviserName = adviser.getPerson().getName();
-        String adviserEmail = adviser.getEmail();
+    public void notifyLeadAssignee(User assignee, Lead lead, Bot bot) {
+        NotificationChannel channel = assignee.getNotificationChannel();
+        String assigneeName = assignee.getPerson().getName();
+        String assigneeEmail = assignee.getEmail();
 
-        if (channel == NotificationChannel.EMAIL || channel == NotificationChannel.BOTH) {
+        if (channel == NotificationChannel.EMAIL) {
             emailService.sendLeadNotification(
-                    adviserEmail,
-                    adviserName,
+                    assigneeEmail,
+                    assigneeName,
                     lead,
                     bot.getName()
             );
         }
 
-        if (channel == NotificationChannel.WHATSAPP || channel == NotificationChannel.BOTH) {
+        if (channel == NotificationChannel.WHATSAPP) {
             //TODO: Whastapp integration (twilio)
         }
     }

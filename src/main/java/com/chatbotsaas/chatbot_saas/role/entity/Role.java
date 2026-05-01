@@ -46,4 +46,9 @@ public class Role {
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
     }
+
+    public void update(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
 }

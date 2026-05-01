@@ -1,5 +1,6 @@
 package com.chatbotsaas.chatbot_saas.permission.service;
 
+import com.chatbotsaas.chatbot_saas.module.constant.ModuleConstants;
 import com.chatbotsaas.chatbot_saas.module.dto.ModulePermissionDto;
 import com.chatbotsaas.chatbot_saas.module.repository.ModuleRepository;
 import com.chatbotsaas.chatbot_saas.permission.entity.Permission;
@@ -43,7 +44,7 @@ public class PermissionService {
 
             if (!userActions.contains("view")) continue;
 
-            if (module.getName().equals("whatsapp-config") && implementationType == ImplementationType.WIDGET) continue;
+            if (module.getModuleId().equals(ModuleConstants.WHATSAPP_MODULE) && implementationType == ImplementationType.WIDGET) continue;
 
             Map<String, Boolean> permissions = new LinkedHashMap<>();
 

@@ -28,8 +28,8 @@ public class WhatsappConfig {
     @Column(name = "phone_number_id", nullable = false)
     private String phoneNumberId;
 
-    @Column(name = "api_key", nullable = false)
-    private String apiKey;
+    @Column(name = "access_token", nullable = false, columnDefinition = "TEXT")
+    private String accessToken;
 
     @Column(name = "is_active", nullable = false)
     private Boolean isActive;
@@ -42,19 +42,19 @@ public class WhatsappConfig {
         this.createdAt = LocalDateTime.now();
     }
 
-    public WhatsappConfig(Bot bot, String phoneNumberId, String apiKey, Boolean isActive) {
+    public WhatsappConfig(Bot bot, String phoneNumberId, String accessToken, Boolean isActive) {
         this.bot = bot;
         this.phoneNumberId = phoneNumberId;
-        this.apiKey = apiKey;
+        this.accessToken = accessToken;
         this.isActive = isActive;
     }
 
-    public static WhatsappConfig create(Bot bot, String phoneNumberId, String apiKey) {
-        return new WhatsappConfig(bot, phoneNumberId, apiKey, Boolean.TRUE);
+    public static WhatsappConfig create(Bot bot, String phoneNumberId, String accessToken) {
+        return new WhatsappConfig(bot, phoneNumberId, accessToken, Boolean.TRUE);
     }
 
-    public void update(String phoneNumberId, String apiKey) {
+    public void update(String phoneNumberId, String accessToken) {
         this.phoneNumberId = phoneNumberId;
-        this.apiKey = apiKey;
+        this.accessToken = accessToken;
     }
 }
