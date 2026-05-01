@@ -16,8 +16,14 @@ import java.util.List;
 @NoArgsConstructor
 public class LoginResponse {
 
-    @JsonProperty("token")
-    private String token;
+    @JsonProperty("access_token")
+    private String accessToken;
+
+    @JsonProperty("refresh_token")
+    private String refreshToken;
+
+    @JsonProperty("expires_in")
+    private Long expiresIn;
 
     @JsonProperty("type")
     private String type = "Bearer";
@@ -30,9 +36,4 @@ public class LoginResponse {
 
     @JsonProperty("modules")
     private List<ModulePermissionDto> modules;
-
-    public LoginResponse(String token) {
-        this.token = token;
-        this.type = "Bearer";
-    }
 }

@@ -1,11 +1,18 @@
 package com.chatbotsaas.chatbot_saas.bot.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import lombok.Getter;
 
-@Getter
+import java.util.List;
+import java.util.UUID;
 
+@Getter
+@Builder
 public class ResponseBotDto {
+
+    @JsonProperty(value = "bot_id")
+    private UUID botId;
 
     @JsonProperty(value = "name")
     private String name;
@@ -16,9 +23,9 @@ public class ResponseBotDto {
     @JsonProperty(value = "is_active")
     private Boolean isActive;
 
-    public ResponseBotDto(String name, String description, Boolean isActive) {
-        this.name = name;
-        this.description = description;
-        this.isActive = isActive;
-    }
+    @JsonProperty(value = "implementation_type")
+    private String implementationType;
+
+    @JsonProperty(value = "lead_assignees")
+    private List<BotAssigneeDto> leadAssignees;
 }

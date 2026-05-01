@@ -1,11 +1,13 @@
 package com.chatbotsaas.chatbot_saas.tenant.entity;
 
+import com.chatbotsaas.chatbot_saas.quota.entity.SubscriptionPlan;
 import com.chatbotsaas.chatbot_saas.tenant.enums.ImplementationType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -37,6 +39,19 @@ public class Tenant {
     @Enumerated(EnumType.STRING)
     private ImplementationType implementationType;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subscription_plan_id")
+    private SubscriptionPlan subscriptionPlan;
+
+    @Column(name = "billing_cycle_day")
+    private Short billingCycleDay;
+
+    @Column(name = "current_cycle_start")
+    private LocalDate currentCycleStart;
+
+    @Column(name = "current_cycle_end")
+    private LocalDate currentCycleEnd;
+
     @PrePersist //It sets createdAt automatically every time you save a new Tenant, so you never have to set it manually
     public void prePersist() {
         this.createdAt = LocalDateTime.now(); //Sets the date automatically on creation
@@ -51,5 +66,33 @@ public class Tenant {
 
     public static Tenant create(String name, String email, ImplementationType implementationType) {
         return new Tenant(name, email, Boolean.TRUE, implementationType);
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setImplementationType(ImplementationType implementationType) {
+        this.implementationType = implementationType;
+    }
+
+    public void setSubscriptionPlan(SubscriptionPlan subscriptionPlan) {
+        this.subscriptionPlan = subscriptionPlan;
+    }
+
+    public void setBillingCycleDay(Short billingCycleDay) {
+        this.billingCycleDay = billingCycleDay;
+    }
+
+    public void setCurrentCycleStart(LocalDate currentCycleStart) {
+        this.currentCycleStart = currentCycleStart;
+    }
+
+    public void setCurrentCycleEnd(LocalDate currentCycleEnd) {
+        this.currentCycleEnd = currentCycleEnd;
     }
 }

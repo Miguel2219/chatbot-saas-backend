@@ -49,7 +49,7 @@ public class User {
     @OneToOne(mappedBy = "user")
     private Person person;
 
-    @ManyToMany(mappedBy = "advisers")
+    @ManyToMany(mappedBy = "leadAssignees")
     private List<Bot> bots = new ArrayList<>();
 
     @Column(name = "notification_channel", nullable = true)
@@ -89,9 +89,22 @@ public class User {
         this.mustChangePassword = mustChangePassword;
     }
 
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
+    }
+
+    public void setNotificationChannel(NotificationChannel notificationChannel) {
+        this.notificationChannel = notificationChannel;
+    }
+
     public boolean isAdmin() {
         return this.roles.stream()
                 .anyMatch(role -> role.getRoleId().equals(RoleConstants.ADMIN_ROLE));
+    }
+
+    public boolean isTenantOwner() {
+        return this.roles.stream()
+                .anyMatch(role -> role.getRoleId().equals(RoleConstants.TENANT_OWNER_ROLE));
     }
 
 }

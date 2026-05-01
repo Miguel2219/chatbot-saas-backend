@@ -1,9 +1,7 @@
 package com.chatbotsaas.chatbot_saas.auth.service;
 
-import com.chatbotsaas.chatbot_saas.auth.dto.ChangePasswordRequest;
-import com.chatbotsaas.chatbot_saas.auth.dto.LoginRequest;
-import com.chatbotsaas.chatbot_saas.auth.dto.LoginResponse;
-import com.chatbotsaas.chatbot_saas.auth.dto.RegisterRequest;
+import com.chatbotsaas.chatbot_saas.auth.dto.*;
+import com.chatbotsaas.chatbot_saas.auth.entity.RefreshToken;
 import com.chatbotsaas.chatbot_saas.auth.security.JwtTokenProvider;
 import com.chatbotsaas.chatbot_saas.module.dto.ModulePermissionDto;
 import com.chatbotsaas.chatbot_saas.permission.service.PermissionService;
@@ -40,6 +38,7 @@ public class AuthService {
     private final PermissionService permissionService;
     private final RoleRepository roleRepository;
     private final PersonRepository personRepository;
+    private final RefreshTokenService refreshTokenService;
 
     @Transactional
     public void register(RegisterRequest request) {
@@ -82,42 +81,42 @@ public class AuthService {
                         () -> new AppException("User not found", HttpStatus.NOT_FOUND)
                 );
 
-        UserResponse userResponse = getUserResponse(user);
-
-        String token = jwtTokenProvider.generateToken(userResponse.getEmail());
-
-        boolean hasTenant = !user.isAdmin();
-
-        List<ModulePermissionDto> modules = permissionService.getModulesForUser(
-                user.getRoles(),
-                hasTenant ? user.getTenant().getImplementationType() : null
-        );
-
-        return LoginResponse.builder()
-                .token(token)
-                .type("Bearer")
-                .user(userResponse)
-                .implementationType(hasTenant ? user.getTenant().getImplementationType().name() : null)
-                .modules(modules)
-                .build();
+        return buildLoginResponse(user);
     }
 
-    private UserResponse getUserResponse(User user) {
-        List<String> roles = user.getRoles()
-                .stream()
-                .map(Role::getName)
-                .toList();
-        return UserResponse.builder()
-                .userId(user.getUserId())
-                .email(user.getEmail())
-                .mustChangePassword(user.getMustChangePassword())
-                .notificationChannel(user.getNotificationChannel())
-                .name(user.getPerson().getName())
-                .lastname(user.getPerson().getLastname())
-                .tenantId(user.getTenant() != null ? user.getTenant().getId() : null)
-                .roles(roles)
-                .build();
+    @Transactional
+    public LoginResponse refreshAccessToken(RefreshTokenRequest request) {
+        RefreshToken rotated = refreshTokenService.validateAndRotate(request.getRefreshToken());
+        return buildLoginResponse(rotated.getUser());
     }
+
+    @Transactional
+    public void logout(RefreshTokenRequest request) {
+        refreshTokenService.revoke(request.getRefreshToken());
+    }
+
+    // TODO(MVP): "Cerrar sesión en todos los dispositivos". Dejado comentado
+    // junto con el endpoint en AuthController. Reactivar ambos a la vez.
+    //
+    // /**
+    //  * Endpoint autenticado POST /api/auth/logout-all. Revoca TODOS los
+    //  * refresh tokens activos del usuario que hizo la request. Úsese cuando
+    //  * el user sospecha compromiso de sesión (ej. perdió un dispositivo).
+    //  * El user actual también queda fuera — el frontend limpia su storage
+    //  * local tras el 204.
+    //  *
+    //  * Requiere sesión: si no hay un User en el SecurityContext tiramos
+    //  * 401 UNAUTHORIZED, que el interceptor del cliente interpreta como
+    //  * "tu sesión ya murió, vete a login".
+    //  */
+    // @Transactional
+    // public void logoutAll() {
+    //     User user = getUserAuthenticated();
+    //     if (user == null) {
+    //         throw new AppException("User not authenticated", HttpStatus.UNAUTHORIZED);
+    //     }
+    //     refreshTokenService.revokeAllForUserId(user.getUserId());
+    // }
 
     @Transactional
     public void changePassword(ChangePasswordRequest request) {
@@ -141,5 +140,43 @@ public class AuthService {
             return userRepository.findByEmail(userDetails.getUsername()).orElse(null);
         }
         return null;
+    }
+
+    private LoginResponse buildLoginResponse(User user) {
+        UserResponse userResponse = getUserResponse(user);
+        String accessToken = jwtTokenProvider.generateToken(userResponse.getEmail());
+        String refreshToken = refreshTokenService.issueFor(user);
+        boolean hasTenant = !user.isAdmin();
+        List<ModulePermissionDto> modules = permissionService.getModulesForUser(
+                user.getRoles(),
+                hasTenant ? user.getTenant().getImplementationType() : null
+        );
+
+        return LoginResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .expiresIn(jwtTokenProvider.getAccessTokenExpirationMs() / 1000L)
+                .type("Bearer")
+                .user(userResponse)
+                .implementationType(hasTenant ? user.getTenant().getImplementationType().name() : null)
+                .modules(modules)
+                .build();
+    }
+
+    private UserResponse getUserResponse(User user) {
+        List<String> roles = user.getRoles()
+                .stream()
+                .map(Role::getName)
+                .toList();
+        return UserResponse.builder()
+                .userId(user.getUserId())
+                .email(user.getEmail())
+                .mustChangePassword(user.getMustChangePassword())
+                .notificationChannel(user.getNotificationChannel())
+                .name(user.getPerson().getName())
+                .lastname(user.getPerson().getLastname())
+                .tenantId(user.getTenant() != null ? user.getTenant().getId() : null)
+                .roles(roles)
+                .build();
     }
 }

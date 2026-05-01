@@ -17,7 +17,8 @@ public class GlobalExceptionHandler {
         ErrorResponse error = new ErrorResponse(
                 ex.getStatus().value(),
                 ex.getMessage(),
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                ex.getCode()   // puede ser null → JSON omite el campo (NON_NULL)
         );
         return new ResponseEntity<>(error, ex.getStatus());
     }

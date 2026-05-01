@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,29 +24,33 @@ public class ConversationController {
     private final ConversationService conversationService;
 
     @PostMapping
+    @PreAuthorize("@permissionChecker.hasPermission('conversations', 'view')")
     public ResponseEntity<ConversationResponseDto> saveConversations (
             @Valid @RequestBody ConversationRequestDto requestDto
     ) {
         return new ResponseEntity<>(conversationService.saveMessage(requestDto), HttpStatus.CREATED);
     }
 
-    @GetMapping("/bot/{bot_id}")
-    public ResponseEntity<Page<ConversationResponseDto>> getConversationsByBot(
+    @GetMapping
+    @PreAuthorize("@permissionChecker.hasPermission('conversations', 'view')")
+    public ResponseEntity<Page<ConversationResponseDto>> getConversations(
+            @RequestParam(required = false) UUID botId,
+            @RequestParam(required = false) UUID tenantId,
             @RequestParam(defaultValue = "0") int offset,
             @RequestParam(defaultValue = "10") int limit,
             @RequestParam(defaultValue = "createdAt") String order_by,
-            @RequestParam(defaultValue = "desc") String order,
-            @PathVariable(value = "bot_id") UUID botId
+            @RequestParam(defaultValue = "desc") String order
     )
     {
         Pageable pageable = order.equalsIgnoreCase("desc")
                 ? PageRequest.of(offset, limit, Sort.by(order_by).descending())
                 : PageRequest.of(offset, limit, Sort.by(order_by).ascending());
 
-        return new ResponseEntity<>(conversationService.getConversationByBot(botId, pageable), HttpStatus.OK);
+        return new ResponseEntity<>(conversationService.getConversations(botId, tenantId, pageable), HttpStatus.OK);
     }
 
     @GetMapping("/session/{session_id}")
+    @PreAuthorize("@permissionChecker.hasPermission('conversations', 'view')")
     public ResponseEntity<List<ConversationResponseDto>> getConversationBySession(
             @PathVariable(name = "session_id") String sessionId
     ) {

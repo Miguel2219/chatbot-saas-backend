@@ -3,6 +3,7 @@ package com.chatbotsaas.chatbot_saas.auth.security;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -15,15 +16,16 @@ public class JwtTokenProvider {
     @Value("${jwt.secret}")
     private String secretKey;
 
-    @Value("${jwt.expiration}")
-    private long expiration;
+    @Getter
+    @Value("${jwt.access-token-expiration-ms}")
+    private long accessTokenExpirationMs;
 
-    // This method takes the user's email, builds a JWT with it, signs it with the secret key and returns the token (creates and signs a JWT from an email)
+    // Toma el email del usuario, construye un JWT, lo firma con la secret key y lo devuelve.
     public String generateToken(String email) {
         return Jwts.builder()
                 .subject(email) //sets the "sub" claim
                 .issuedAt(new Date()) //sets "iat"
-                .expiration(new Date(System.currentTimeMillis() + expiration)) //sets "exp"
+                .expiration(new Date(System.currentTimeMillis() + accessTokenExpirationMs)) //sets "exp"
                 .signWith(getSigningKey()) //signs with your secret
                 .compact();
     }

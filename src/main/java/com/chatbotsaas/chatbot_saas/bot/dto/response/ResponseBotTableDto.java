@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -27,4 +28,16 @@ public class ResponseBotTableDto {
 
     @JsonProperty(value = "created_at")
     private LocalDateTime createdAt;
+
+    @JsonProperty(value = "tenant_id")
+    private UUID tenantId;
+
+    @JsonProperty(value = "tenant_name")
+    private String tenantName;
+
+    @JsonProperty(value = "implementation_type")
+    private String implementationType;
+
+    @JsonProperty(value = "lead_assignees")
+    private List<BotAssigneeDto> leadAssignees;
 }

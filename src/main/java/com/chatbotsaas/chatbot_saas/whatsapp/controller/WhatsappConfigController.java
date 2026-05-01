@@ -6,6 +6,7 @@ import com.chatbotsaas.chatbot_saas.whatsapp.service.WhatsappConfigService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -17,6 +18,7 @@ public class WhatsappConfigController {
     private final WhatsappConfigService whatsappConfigService;
 
     @PostMapping("/{bot_id}")
+    @PreAuthorize("@permissionChecker.hasPermission('whatsapp-config', 'create')")
     public ResponseEntity<Void> createConfig(
             @PathVariable(name = "bot_id") UUID botId,
             @RequestBody CreateWhatsappConfigRequest request
@@ -26,6 +28,7 @@ public class WhatsappConfigController {
     }
 
     @GetMapping("/{bot_id}")
+    @PreAuthorize("@permissionChecker.hasPermission('whatsapp-config', 'view')")
     public ResponseEntity<WhatsappConfigResponseDto> getConfigByBot(
             @PathVariable(name = "bot_id") UUID botId
     ) {
@@ -33,6 +36,7 @@ public class WhatsappConfigController {
     }
 
     @PutMapping("/{config_id}")
+    @PreAuthorize("@permissionChecker.hasPermission('whatsapp-config', 'edit')")
     public ResponseEntity<WhatsappConfigResponseDto> updateConfig(
             @PathVariable(name = "config_id") UUID configId,
             @RequestBody CreateWhatsappConfigRequest request
@@ -41,6 +45,7 @@ public class WhatsappConfigController {
     }
 
     @DeleteMapping("/{config_id}")
+    @PreAuthorize("@permissionChecker.hasPermission('whatsapp-config', 'delete')")
     public ResponseEntity<WhatsappConfigResponseDto> deleteConfig(
             @PathVariable(name = "config_id") UUID configId
     ) {

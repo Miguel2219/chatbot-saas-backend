@@ -6,6 +6,7 @@ import com.chatbotsaas.chatbot_saas.permission.service.RolePermissionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +20,7 @@ public class RolePermissionController {
     private final RolePermissionService rolePermissionService;
 
     @GetMapping("/{role_id}")
+    @PreAuthorize("@permissionChecker.hasPermission('roles', 'view')")
     public ResponseEntity<List<ModulePermissionsDto>> getPermissionsByRole(
             @PathVariable(value = "role_id") UUID roleId
             ) {
@@ -28,6 +30,7 @@ public class RolePermissionController {
     }
 
     @PutMapping("/{role_id}")
+    @PreAuthorize("@permissionChecker.hasPermission('roles', 'edit')")
     public ResponseEntity<Void> updateRolePermissions(
             @PathVariable(value = "role_id") UUID roleId,
             @RequestBody UpdateRolePermissionsRequestDto request) {

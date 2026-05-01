@@ -38,4 +38,12 @@ public class  Person {
 
     @Column(name = "available", nullable = false)
     private Boolean available;
+
+    // Setters para los campos editables desde `UserService.updateUser`. No se
+    // usa @Setter a nivel de clase para no exponer mutabilidad innecesaria
+    // (personId, user, available no deberían cambiar post-creación).
+    public void setName(String name) { this.name = name; }
+    public void setLastname(String lastname) { this.lastname = lastname; }
+    public void setPhone(String phone) { this.phone = phone; }
+    public void setNumberDocument(String numberDocument) { this.numberDocument = numberDocument; }
 }

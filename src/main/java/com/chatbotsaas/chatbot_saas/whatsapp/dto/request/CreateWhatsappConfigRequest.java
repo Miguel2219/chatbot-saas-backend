@@ -10,6 +10,6 @@ public class CreateWhatsappConfigRequest {
     @JsonProperty("phone_number_id")
     private String phoneNumberId;
 
-    @JsonProperty("api_key")
-    private String apiKey;
+    @JsonProperty("access_token")
+    private String accessToken;
 }

@@ -3,6 +3,7 @@ package com.chatbotsaas.chatbot_saas.whatsapp.service;
 import com.chatbotsaas.chatbot_saas.bot.entity.Bot;
 import com.chatbotsaas.chatbot_saas.bot.repository.BotRepository;
 import com.chatbotsaas.chatbot_saas.shared.exception.AppException;
+import com.chatbotsaas.chatbot_saas.shared.security.TenantAccessValidator;
 import com.chatbotsaas.chatbot_saas.whatsapp.dto.request.CreateWhatsappConfigRequest;
 import com.chatbotsaas.chatbot_saas.whatsapp.dto.response.WhatsappConfigResponseDto;
 import com.chatbotsaas.chatbot_saas.whatsapp.entity.WhatsappConfig;
@@ -17,11 +18,13 @@ import java.util.UUID;
 public class WhatsappConfigService {
     private final WhatsappConfigRepository whatsappConfigRepository;
     private final BotRepository botRepository;
+    private final TenantAccessValidator tenantAccessValidator;
 
 
-    public WhatsappConfigService(WhatsappConfigRepository whatsappConfigRepository, BotRepository botRepository) {
+    public WhatsappConfigService(WhatsappConfigRepository whatsappConfigRepository, BotRepository botRepository, TenantAccessValidator tenantAccessValidator) {
         this.whatsappConfigRepository = whatsappConfigRepository;
         this.botRepository = botRepository;
+        this.tenantAccessValidator = tenantAccessValidator;
     }
 
     private WhatsappConfigResponseDto toResponseDto(WhatsappConfig whatsappConfig) {
@@ -38,10 +41,14 @@ public class WhatsappConfigService {
         Bot bot = botRepository.findById(botId).orElseThrow(
                 () -> new AppException("Bot not found", HttpStatus.NOT_FOUND)
         );
+        // Aislamiento multi-tenant — sin este guard un user del tenant A
+        // podía crear una config WhatsApp apuntando al bot del tenant B
+        // (y con ello enrutar mensajes ajenos a su número).
+        tenantAccessValidator.assertCanAccessBot(bot);
 
         whatsappConfigRepository.save(
                 WhatsappConfig.create(
-                        bot, request.getPhoneNumberId(), request.getApiKey()
+                        bot, request.getPhoneNumberId(), request.getAccessToken()
                 )
         );
     }
@@ -51,6 +58,8 @@ public class WhatsappConfigService {
         Bot bot = botRepository.findById(botId).orElseThrow(
                 () -> new AppException("Bot not found", HttpStatus.NOT_FOUND)
         );
+        // La config contiene accessToken (secreto) — validar tenant antes de leer.
+        tenantAccessValidator.assertCanAccessBot(bot);
         WhatsappConfig config = whatsappConfigRepository.findByBot_BotId(bot.getBotId()).orElseThrow(
                 () -> new AppException("Config not found", HttpStatus.NOT_FOUND)
         );
@@ -62,9 +71,11 @@ public class WhatsappConfigService {
         WhatsappConfig config = whatsappConfigRepository.findById(configId).orElseThrow(
                 () -> new AppException("Config not found", HttpStatus.NOT_FOUND)
         );
+        // Resolver el bot vía FK y validar — sin esto cualquier user con
+        // `whatsapp-config:edit` podía modificar la config de otro tenant.
+        tenantAccessValidator.assertCanAccessBot(config.getBot());
 
-
-        config.update(request.getPhoneNumberId(), request.getApiKey());
+        config.update(request.getPhoneNumberId(), request.getAccessToken());
         whatsappConfigRepository.save(config);
 
         return toResponseDto(config);
@@ -75,6 +86,7 @@ public class WhatsappConfigService {
         WhatsappConfig config = whatsappConfigRepository.findById(configId).orElseThrow(
                 () -> new AppException("Config not found", HttpStatus.NOT_FOUND)
         );
+        tenantAccessValidator.assertCanAccessBot(config.getBot());
         whatsappConfigRepository.delete(config);
 
         return toResponseDto(config);
