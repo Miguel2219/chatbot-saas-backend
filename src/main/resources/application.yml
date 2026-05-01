@@ -4,9 +4,9 @@ spring:
 
   # ── Datasource ─────────────────────────────────────────────────────────────
   datasource:
-    url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
-    username: ${PGUSER}
-    password: ${PGPASSWORD}    # secret — sin default
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/chatbot_saas}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}   # secret — sin default
 
   # ── JPA / Hibernate ────────────────────────────────────────────────────────
   jpa:
