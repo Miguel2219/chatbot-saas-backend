@@ -30,9 +30,9 @@ spring:
       max-file-size: 10MB        # constantes
       max-request-size: 50MB
 
-  # ── SMTP (Gmail por default) ───────────────────────────────────────────────
-  resend:
-    api-key: ${RESEND_API_KEY}
+# ── SMTP (Gmail por default) ───────────────────────────────────────────────
+resend:
+  api-key: ${RESEND_API_KEY}
 
 # ── Frontend / CORS ──────────────────────────────────────────────────────────
 # Dominio del panel — usado por CorsConfig (whitelist) y por EmailService
