@@ -22,7 +22,7 @@ spring:
     enabled: true                # constantes
     locations: classpath:db/migration
     baseline-on-migrate: true
-    baseline-version: 2
+    baseline-version: 0
 
   # ── Multipart / uploads ────────────────────────────────────────────────────
   servlet:
