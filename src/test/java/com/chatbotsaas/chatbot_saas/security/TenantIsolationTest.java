@@ -46,6 +46,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import software.amazon.awssdk.services.s3.S3Client;
 
 import java.lang.reflect.Constructor;
 import java.util.List;
@@ -100,6 +101,7 @@ class TenantIsolationTest {
     @Mock NotificationService notificationService;
     @Mock DocumentRepository documentRepository;
     @Mock PythonRagClient pythonRagClient;
+    @Mock S3Client s3Client;
 
     // WhatsApp config
     @Mock WhatsappConfigRepository whatsappConfigRepository;
@@ -136,7 +138,7 @@ class TenantIsolationTest {
         botService = new BotService(botRepository, tenantRepository, userRepository, authService, tenantAccessValidator);
         conversationService = new ConversationService(botRepository, conversationRepository, authService, tenantAccessValidator);
         leadService = new LeadService(leadRepository, botRepository, notificationService, userRepository, authService, tenantAccessValidator);
-        documentService = new DocumentService(documentRepository, botRepository, pythonRagClient, authService, tenantAccessValidator);
+        documentService = new DocumentService(documentRepository, botRepository, pythonRagClient, authService, tenantAccessValidator, s3Client);
         whatsappConfigService = new WhatsappConfigService(whatsappConfigRepository, botRepository, tenantAccessValidator);
 
         adminRole = Entities.role(RoleConstants.ADMIN_ROLE, "ADMIN");
