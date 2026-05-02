@@ -2,8 +2,6 @@
 -- PostgreSQL database dump
 --
 
-\restrict nM15yxXvzyfgRUlTb7duYvcrspbHpCtXLM3EboxPX5AGuvKzbAi5U0yXtAUsQ6X
-
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.6
 
@@ -851,6 +849,4 @@ ALTER TABLE ONLY public.tenants
 --
 -- PostgreSQL database dump complete
 --
-
-\unrestrict nM15yxXvzyfgRUlTb7duYvcrspbHpCtXLM3EboxPX5AGuvKzbAi5U0yXtAUsQ6X
 
