@@ -60,7 +60,18 @@ server:
 app:
   python-service-url: ${PYTHON_SERVICE_URL:http://localhost:8000}
   internal-api-key: ${INTERNAL_API_KEY}    # secret — shared con el RAG
-  upload-dir: ${APP_UPLOAD_DIR:uploads}
+
+  # ── Object Storage (Cloudflare R2 / S3-compatible) ─────────────────────
+  # Reemplaza el storage local en /app/uploads. El backend sube acá los
+  # archivos que envían los clientes y le pasa la s3_key al RAG, que los
+  # descarga del mismo bucket. Sin esto, los archivos se perdían en cada
+  # redeploy de Railway (filesystem efímero del contenedor).
+  storage:
+    endpoint: ${R2_ENDPOINT}                   # https://<account_id>.r2.cloudflarestorage.com
+    bucket: ${R2_BUCKET}                       # nombre del bucket (ej. chatbot-saas-uploads)
+    region: ${R2_REGION:auto}                  # R2 usa "auto" por convención
+    access-key-id: ${R2_ACCESS_KEY_ID}         # secret
+    secret-access-key: ${R2_SECRET_ACCESS_KEY} # secret
 
   whatsapp:
     verify-token: ${APP_WHATSAPP_VERIFY_TOKEN}    # secret

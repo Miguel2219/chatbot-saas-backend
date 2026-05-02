@@ -16,6 +16,10 @@ public class ProcessDocumentRequest {
     @JsonProperty(value = "file_id")
     private UUID documentId;
 
-    @JsonProperty(value = "file_path")
-    private String filePath;
+    /**
+     * Key del objeto en R2 (ej: "bots/{botId}/{uuid}_{filename}").
+     * El RAG la usa para descargar el archivo del bucket vía boto3.
+     */
+    @JsonProperty(value = "s3_key")
+    private String s3Key;
 }

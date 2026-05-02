@@ -127,6 +127,13 @@
             <artifactId>resend-java</artifactId>
             <version>3.1.0</version>
         </dependency>
+
+        <!-- AWS SDK v2 - S3 client (compatible con Cloudflare R2 vía endpoint custom) -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>2.29.0</version>
+        </dependency>
 	</dependencies>
 	<build>
 		<plugins>
