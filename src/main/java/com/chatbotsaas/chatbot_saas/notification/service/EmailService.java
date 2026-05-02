@@ -27,7 +27,7 @@ public class EmailService {
     private final String zolvionAdminEmail;
 
     public EmailService(
-            @Value("${spring.resend.api-key}") String apiKey,
+            @Value("${resend.api-key}") String apiKey,
             @Value("${zolvion.admin-email:}") String zolvionAdminEmail
     ) {
         this.resend = new Resend(apiKey);
