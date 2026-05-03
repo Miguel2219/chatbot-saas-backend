@@ -55,6 +55,7 @@ server:
   servlet:
     context-path: /app           # constante
   port: ${SERVER_PORT:8080}
+  forward-headers-strategy: framework
 
 # ── App-specific ─────────────────────────────────────────────────────────────
 app:
