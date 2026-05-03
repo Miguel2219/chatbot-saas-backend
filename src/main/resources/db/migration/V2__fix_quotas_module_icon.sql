@@ -1,0 +1,1 @@
+UPDATE modules SET icon = 'bar_chart' WHERE route = 'quotas';
