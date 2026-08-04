@@ -1,50 +1,16 @@
 -- ============================================================================
--- Seed: ADMIN inicial de Zolvion
+-- Initial administrator seed
 -- ============================================================================
+-- Creates the first administrator account so the platform can be accessed
+-- after a clean deployment.
 --
--- Propósito
--- ---------
--- Crear el primer usuario con rol ADMIN de la plataforma. El ADMIN de Zolvion
--- no se crea automáticamente en ninguna migración Flyway a propósito: las
--- credenciales quedan fuera del código versionado y la ejecución es manual y
--- deliberada. Este archivo vive en `src/main/resources/db/seed/` (NO en
--- `db/migration/`) justamente para que Flyway no lo corra solo.
+-- The seeded credential is single-use: the account is flagged so the
+-- application forces a password change on first login, and the initial value
+-- is unusable afterwards. The stored value is a BCrypt hash — the plaintext
+-- is not kept in this repository.
 --
--- Cuándo usarlo
--- -------------
---   * Local dev: tras `DROP SCHEMA public CASCADE` + arrancar la app una vez
---     (para que Hibernate/Flyway recreen las tablas y corran V1..V5), luego
---     apagar la app y ejecutar este script.
---   * Producción: una sola vez, después del primer despliegue exitoso.
---
--- Cómo usarlo
--- -----------
---   psql -U postgres -d chatbot_saas -f src/main/resources/db/seed/seed_initial_admin.sql
---
--- O desde la raíz del repo:
---   psql -h localhost -U postgres -d chatbot_saas \
---        -f chatbot-saas-backend/src/main/resources/db/seed/seed_initial_admin.sql
---
--- El script es idempotente: si el ADMIN ya existe, los INSERTs no hacen nada
--- (ON CONFLICT DO NOTHING) y la SELECT final te muestra el estado actual.
---
--- Credenciales de primer login
--- ----------------------------
---   Email    : lmangelryl1512@gmail.com
---   Password : Zolvion2026!
---
--- `must_change_password` queda en TRUE — el ADMIN de Zolvion configura el
--- sistema, ya conoce la contraseña y la puede rotar desde el panel cuando
--- quiera. El flag TRUE aplica al flujo de invitación (users creados con
--- password temporal).
---
--- Nota sobre el hash
--- ------------------
--- El hash quemado abajo es BCrypt ($2b$10$) generado a partir de "Zolvion2026!".
--- Spring Security's BCryptPasswordEncoder.matches() acepta tanto $2a$ como $2b$
--- (ambos son el mismo algoritmo; $2b$ es la variante "moderna" post-2014).
--- Si en algún momento hay que rotar la contraseña inicial: regenerar el hash
--- con cualquier librería bcrypt estándar y reemplazar el literal de abajo.
+-- This seed is meant to run once, on an empty database. Re-running it against
+-- an existing installation is not supported.
 -- ============================================================================
 
 BEGIN;
@@ -52,7 +18,7 @@ BEGIN;
 -- ----------------------------------------------------------------------------
 -- 1. User (ADMIN sin tenant propio)
 -- ----------------------------------------------------------------------------
--- password = BCrypt("Zolvion2026!")
+--   Password : single-use, forced to change on first login
 INSERT INTO users (
     user_id,
     email,
